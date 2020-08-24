@@ -1,0 +1,61 @@
+{{- $testValue := include "mychart.test" . -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-configmap
+  # Pass through top-level scope by specifying . otherwise name and version will not be accessible
+  {{- template "mychart.labels" . }}
+
+  # Using include imports the contents of the template into the present pipeline
+  labels:
+{{ include "mychart.app" . | indent 4 }}
+data:
+  myvalue: "Hello World"
+  {{- $relname := .Release.Name }}
+  {{- $files := .Files }}
+
+  # Scoped access
+  {{- with .Values.favorite }}
+  drink: {{ .drink | default "tea" | quote }}
+  food: {{ .food | upper | quote }}
+  # Using assigned variable
+  release: {{ $relname }}
+  toppings: |-
+    # The $ allows .Values to be accessed at the parent scope
+    {{- range $.Values.pizzaToppings }}
+    - {{ . | title | quote }}
+    {{- end }}
+  {{- end }}
+
+  # Conditional
+  {{- if eq .Values.favorite.drink "coffee" }}
+  cake: "yes"
+  {{ else }}
+  cake: "no"
+  {{- end }}
+
+  # Iterate through pizza sizes using variables
+  sizes: |-
+    {{- range $index, $size := .Values.pizzaSizes }}
+    {{ $index }}: {{ $size }}
+    {{- end }}
+
+  # We can also iterate through values using key/value pairs
+  {{- range $key, $val := .Values.favorite }}
+  {{ $key }}: {{ $val | quote }}
+  {{- end }}
+
+  # Using include imports the contents of the template into the present pipeline
+  # Because template is an action, and not a function, there is no way to pass the
+  # output of a template call to other functions; the data is simply inserted inline.
+{{ include "mychart.app" . | indent 2 }}
+
+  # We use the tuple function to create a list of files that we loop through. 
+  # Then we print each file name followed by the contents of the file
+  {{- range tuple "config1.toml" "config3.toml" "config3.toml"}}
+  {{ . }}: |-
+    {{ $files.Get . }}
+  {{- end }}
+
+  testValue: {{$testValue}}
+
