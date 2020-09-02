@@ -21,3 +21,7 @@ app_version: "{{ .Chart.Version }}"
 {{- $two := printf "%s%s" "http" $one -}}
 {{ $two }}
 {{- end -}}
+
+{{- define "mychart.scopes" -}}
+"{{- join "\",\"" .Values.scopes }}"
+{{- end }}

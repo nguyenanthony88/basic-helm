@@ -59,3 +59,8 @@ data:
 
   testValue: {{$testValue}}
 
+  {{ $scopes := include "mychart.scopes" . }}
+  test-client.json: |
+    {
+      "scopes": [ {{$scopes}} ]
+    }

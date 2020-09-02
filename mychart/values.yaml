@@ -27,6 +27,11 @@ pizzaSizes:
   - medium
   - large
 
+scopes:
+  - one
+  - two
+  - three
+
 testValue: ""
 
 serviceAccount:
